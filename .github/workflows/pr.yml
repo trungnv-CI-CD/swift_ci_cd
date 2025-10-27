@@ -36,34 +36,34 @@ jobs:
           echo "Current Xcode path: $(xcode-select -p)"
           xcodebuild -version
 
-          - name: Install Bundler & dependencies
-          run: |
-            # Ensure Bundler is installed (only if missing)
-            if ! gem list -i bundler > /dev/null; then
-              echo "🔧 Installing Bundler..."
-              gem install bundler --no-document
-            else
-              echo "✅ Bundler already installed"
-            fi
+      - name: Install Bundler & dependencies
+        run: |
+          # Ensure Bundler is installed (only if missing)
+          if ! gem list -i bundler > /dev/null; then
+            echo "🔧 Installing Bundler..."
+            gem install bundler --no-document
+          else
+            echo "✅ Bundler already installed"
+          fi
 
-            # Install dependencies only if Gemfile exists
-            if [ -f Gemfile ]; then
-              echo "📦 Installing dependencies from Gemfile..."
-              bundle check || bundle install --jobs 4 --retry 3
-            else
-              echo "⚠️ No Gemfile found, skipping bundle install"
-            fi
+          # Install dependencies only if Gemfile exists
+          if [ -f Gemfile ]; then
+            echo "📦 Installing dependencies from Gemfile..."
+            bundle check || bundle install --jobs 4 --retry 3
+          else
+            echo "⚠️ No Gemfile found, skipping bundle install"
+          fi
 
-            # Check Fastlane availability
-            if bundle exec fastlane --version > /dev/null 2>&1; then
-              echo "✅ Fastlane already available"
-            else
-              echo "🚀 Installing Fastlane..."
-              gem install fastlane --no-document
-            fi
+          # Check Fastlane availability
+          if bundle exec fastlane --version > /dev/null 2>&1; then
+            echo "✅ Fastlane already available"
+          else
+            echo "🚀 Installing Fastlane..."
+            gem install fastlane --no-document
+          fi
 
-            # Display Fastlane version
-            bundle exec fastlane --version
+          # Display Fastlane version
+          bundle exec fastlane --version
 
       - name: Boot iPhone 16 simulator
         run: |
