@@ -29,5 +29,11 @@ jobs:
           bundle install
           bundle exec fastlane --version
 
+      - name: Boot iPhone 16 simulator
+        run: |
+          xcrun simctl boot "iPhone 16" || true
+          xcrun simctl bootstatus "iPhone 16" -b
+          xcrun simctl list devices | grep "iPhone 16"
+
       - name: Run tests
         run: bundle exec fastlane unit_test
