@@ -41,6 +41,8 @@ jobs:
 
       - name: Decode and install provisioning
         run: |
+          echo "PROFILE_BASE64: $PROFILE_BASE64"          
+          echo "--------------------------------"
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles          
           echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
