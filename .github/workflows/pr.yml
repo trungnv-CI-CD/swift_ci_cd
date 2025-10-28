@@ -19,7 +19,7 @@ jobs:
   debug_dist:
     # if: ${{ github.event.inputs.environment != '' }}
     runs-on: macos-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: dev
     env:
       FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
       FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
@@ -31,6 +31,8 @@ jobs:
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
+      - name: Print all environment variables
+        run: printenv | sort
 
       - name: Checkout code
         uses: actions/checkout@v4
