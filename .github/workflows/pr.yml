@@ -26,6 +26,8 @@ jobs:
       CER_PASS: ${{ secrets.CER_PASS }}
       CER_BASE64: ${{ secrets.CER_BASE64 }}
       PROFILE_BASE64: ${{ secrets.PROFILE_BASE64 }}
+      API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -37,6 +39,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Generate xcconfig
+        run: |
+          echo "API_SECRET_KEY=$(echo $API_SECRET_KEY)" > keys.xcconfig
+          cat keys.xcconfig
+          
       - name: Show installed Xcode versions
         run: |
           ls /Applications | grep Xcode

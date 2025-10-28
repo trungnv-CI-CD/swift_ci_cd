@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D893C0F92EB0681C003F8F9F /* keys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D893C0F82EB0681C003F8F9F /* keys.xcconfig */; };
 		D893C0FD2EB06903003F8F9F /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D893C0FC2EB06903003F8F9F /* Config.xcconfig */; };
+		D893C1122EB08CD5003F8F9F /* keys.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = D893C0F82EB0681C003F8F9F /* keys.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -221,7 +221,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D893C0F92EB0681C003F8F9F /* keys.xcconfig in Resources */,
+				D893C1122EB08CD5003F8F9F /* keys.xcconfig in Resources */,
 				D893C0FD2EB06903003F8F9F /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
