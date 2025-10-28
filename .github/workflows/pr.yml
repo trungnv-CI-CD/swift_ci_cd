@@ -41,9 +41,9 @@ jobs:
 
       - name: Generate xcconfig
         run: |
-          echo "API_SECRET_KEY=$(echo $API_SECRET_KEY)" > keys.xcconfig
-          cat keys.xcconfig
-          
+          echo "API_SECRET_KEY=$(echo $API_SECRET_KEY)" > swift_cicd/keys.xcconfig
+          cat swift_cicd/keys.xcconfig
+
       - name: Show installed Xcode versions
         run: |
           ls /Applications | grep Xcode
