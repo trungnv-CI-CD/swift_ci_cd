@@ -41,11 +41,13 @@ jobs:
 
       - name: Decode and install provisioning
         run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles          
           echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
       - name: Decode and install certificate
         run: |
+          echo "CER_BASE64: $CER_BASE64"          
+          echo "--------------------------------"
           echo "$CER_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "" build.keychain
           security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$CER_PASS" -T /usr/bin/codesign
@@ -130,3 +132,5 @@ jobs:
 
   #     - name: Run tests
   #       run: bundle exec fastlane unit_test
+
+  # base64 -i /Users/trungnv/Desktop/private/apple_cer/TrungWildcard.mobileprovision  | pbcopy
