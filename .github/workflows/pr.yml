@@ -5,11 +5,27 @@ on:
     branches: [main]
   pull_request:
     branches: [develop]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select build environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
 
 jobs:
-  test:
+  debug_dist:
+    if: ${{ github.event.inputs.environment != '' }}
     runs-on: macos-latest
-
+    environment: ${{ github.event.inputs.environment }}
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+      CER_PASS: ${{ secrets.CER_PASS }}
+      CER_BASE64: ${{ secrets.CER_BASE64 }}
+      PROFILE_BASE64: ${{ secrets.PROFILE_BASE64 }}
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -23,53 +39,94 @@ jobs:
         run: |
           ls /Applications | grep Xcode
 
-      - name: Cache Ruby gems
-        uses: actions/cache@v4
-        with:
-          path: ~/.bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
-
-      - name: Show Xcode version info
+      - name: Decode and install provisioning
         run: |
-          echo "Current Xcode path: $(xcode-select -p)"
-          xcodebuild -version
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
-      - name: Install Bundler & dependencies
+      - name: Decode and install certificate
         run: |
-          # Ensure Bundler is installed (only if missing)
-          if ! gem list -i bundler > /dev/null; then
-            echo "🔧 Installing Bundler..."
-            gem install bundler --no-document
-          else
-            echo "✅ Bundler already installed"
-          fi
+          echo "$CER_BASE64" | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$CER_PASS" -T /usr/bin/codesign
+          security list-keychains -s ~/Library/Keychains/build.keychain
+          security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+          security set-keychain-settings ~/Library/Keychains/build.keychain
+          rm certificate.p12
 
-          # Install dependencies only if Gemfile exists
-          if [ -f Gemfile ]; then
-            echo "📦 Installing dependencies from Gemfile..."
-            bundle check || bundle install --jobs 4 --retry 3
-          else
-            echo "⚠️ No Gemfile found, skipping bundle install"
-          fi
+      - name: Build and distribute app
+        run: bundle exec fastlane debug_dist
 
-          # Check Fastlane availability
-          if bundle exec fastlane --version > /dev/null 2>&1; then
-            echo "✅ Fastlane already available"
-          else
-            echo "🚀 Installing Fastlane..."
-            gem install fastlane --no-document
-          fi
+  # test:
+  #   runs-on: macos-latest
+  #   environment: ${{ github.event.inputs.environment }}
+  #   env:
+  #     FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  #     FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+  #     CER_PASS: ${{ secrets.CER_PASS }}
+  #     CER_BASE64: ${{ secrets.CER_BASE64 }}
+  #     PROFILE_BASE64: ${{ secrets.PROFILE_BASE64 }}
 
-          # Display Fastlane version
-          bundle exec fastlane --version
+  #   steps:
+  #     - name: Cancel Previous Runs
+  #       uses: styfle/cancel-workflow-action@0.12.1
+  #       with:
+  #         access_token: ${{ github.token }}
 
-      - name: Boot iPhone 16 simulator
-        run: |
-          xcrun simctl boot "iPhone 16" || true
-          xcrun simctl bootstatus "iPhone 16" -b
-          xcrun simctl list devices | grep "iPhone 16"
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Run tests
-        run: bundle exec fastlane unit_test
+  #     - name: Show installed Xcode versions
+  #       run: |
+  #         ls /Applications | grep Xcode
+
+  #     - name: Cache Ruby gems
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.bundle
+  #         key: ${{ runner.os }}-gems-${{ hashFiles('Gemfile.lock') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-gems-
+
+  #     - name: Show Xcode version info
+  #       run: |
+  #         echo "Current Xcode path: $(xcode-select -p)"
+  #         xcodebuild -version
+
+  #     - name: Install Bundler & dependencies
+  #       run: |
+  #         # Ensure Bundler is installed (only if missing)
+  #         if ! gem list -i bundler > /dev/null; then
+  #           echo "🔧 Installing Bundler..."
+  #           gem install bundler --no-document
+  #         else
+  #           echo "✅ Bundler already installed"
+  #         fi
+
+  #         # Install dependencies only if Gemfile exists
+  #         if [ -f Gemfile ]; then
+  #           echo "📦 Installing dependencies from Gemfile..."
+  #           bundle check || bundle install --jobs 4 --retry 3
+  #         else
+  #           echo "⚠️ No Gemfile found, skipping bundle install"
+  #         fi
+
+  #         # Check Fastlane availability
+  #         if bundle exec fastlane --version > /dev/null 2>&1; then
+  #           echo "✅ Fastlane already available"
+  #         else
+  #           echo "🚀 Installing Fastlane..."
+  #           gem install fastlane --no-document
+  #         fi
+
+  #         # Display Fastlane version
+  #         bundle exec fastlane --version
+
+  #     - name: Boot iPhone 16 simulator
+  #       run: |
+  #         xcrun simctl boot "iPhone 16" || true
+  #         xcrun simctl bootstatus "iPhone 16" -b
+  #         xcrun simctl list devices | grep "iPhone 16"
+
+  #     - name: Run tests
+  #       run: bundle exec fastlane unit_test

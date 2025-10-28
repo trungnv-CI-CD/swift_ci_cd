@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Run unit tests
 
+### ios debug_dist
+
+```sh
+[bundle exec] fastlane ios debug_dist
+```
+
+Build app
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

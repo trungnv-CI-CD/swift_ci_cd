@@ -12,6 +12,10 @@ import CoreData
 struct swift_cicdApp: App {
     let persistenceController = PersistenceController.shared
 
+    init() {
+        print("GlobalSettings \(GlobalSettings.env) \(GlobalSettings.apiKey) secretKey \(GlobalSettings.secretKey)")
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

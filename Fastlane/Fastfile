@@ -13,4 +13,24 @@ platform :ios do
       skip_testing: ["swift_cicdUITests"]
     )
   end
+  desc 'Build app'
+  lane :debug_dist do
+    build_app(
+      scheme: "swift_cicd_debug",
+      project: "swift_cicd/swift_cicd.xcodeproj",
+      # export_method: "ad-hoc", # or "development" if you are testing dev builds
+      export_method: "development", # or "development" if you are testing dev builds
+      output_directory: "./build",
+      output_name: "swift_cicd_debug.ipa",
+      export_options: {
+      provisioningProfiles: {
+        "trung.swift-cicd" => "TrungWildcard"
+      }
+    },
+    )
+    # firebase_app_distribution(
+    #   app: ENV["FIREBASE_APP_ID"],
+    #   firebase_cli_token: ENV["FIREBASE_TOKEN"],
+    # )
+  end
 end
